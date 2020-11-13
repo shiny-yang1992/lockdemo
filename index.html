@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="jquery.min.js" type="text/javascript"></script>
+
+<script src="SPUtil.js" type="text/javascript"></script>
+<script src="SPInputManager.js" type="text/javascript"></script>
+<script src="Canvas.js" type="text/javascript"></script>
+<script src="SlotShape.js" type="text/javascript"></script>
+
+<style type="text/css">
+</style>
+
+<script type="text/javascript">
+$(function() {
+	var _g = {
+		_input : SPInputManager(),
+		_canvas : SPCanvas()
+	};
+	
+	var _puzzle_slotshapes = []
+	for (var i = 0; i < 4; i++) {
+		var itr_slotshape = SlotShape(_g)
+		itr_slotshape.set_position(500, 400)
+		itr_slotshape.set_scale(SPUtil.y_for_point_of_2pt_line(0,2,3,1,i))
+		
+		var slots = []
+		for (var j = 0; j < MAX_LOCK_SLOT; j++) {
+			slots.push(j)
+		}
+		for (var j = 0; j < SPUtil.rand_rangei(2, 8); j++) {
+			var tar_i = SPUtil.rand_rangei(0,slots.length)
+			var tar_val = slots[tar_i]
+			slots.splice(tar_i,1)
+			itr_slotshape.slots().push(tar_val)
+		}
+		_puzzle_slotshapes.push(itr_slotshape)
+	}
+	
+	var _choice_slotshapes = []
+	_puzzle_slotshapes.forEach(function(src_slotshape) {
+		var itr_slotshape = SlotShape(_g)
+		src_slotshape.slots().forEach(function(itr_slot) {
+			itr_slotshape.slots().push(itr_slot)
+		})
+		_choice_slotshapes.push(itr_slotshape)
+	})
+	for (var i = 0; i < 4; i++) {
+		var itr_slotshape = SlotShape(_g)
+		var slots = []
+		for (var j = 0; j < MAX_LOCK_SLOT; j++) {
+			slots.push(j)
+		}
+		for (var j = 0; j < SPUtil.rand_rangei(2, 8); j++) {
+			var tar_i = SPUtil.rand_rangei(0,slots.length)
+			var tar_val = slots[tar_i]
+			slots.splice(tar_i,1)
+			itr_slotshape.slots().push(tar_val)
+		}
+		_choice_slotshapes.push(itr_slotshape)
+	}
+	SPUtil.array_shuffle(_choice_slotshapes)
+	_choice_slotshapes.forEach(function(itr,i) {
+		itr.set_position(75 + i*120, 75)
+		itr.set_is_key(true)
+		for (var i = 0; i < SPUtil.rand_rangei(1, MAX_LOCK_SLOT); i++) {
+			itr.rotate_right()
+		}
+	})
+	
+	var _render_selected_key_slotshape = SlotShape(_g)
+	_render_selected_key_slotshape.set_position(500, 400)
+	_render_selected_key_slotshape.set_is_key(true)
+	
+	var _solution_slotshapes = []
+	
+	var _total_time_sec = 0
+	var _total_clicks = 0
+	var _last_time = Date.now()
+	window.setInterval(function() {
+		var current_time = Date.now()
+		var time_delta_sec = (current_time - _last_time) / 1000 
+		if (_solution_slotshapes.length != _puzzle_slotshapes.length) {
+			_total_time_sec = _total_time_sec + time_delta_sec
+		}
+		_last_time = current_time
+		_g._canvas.clear()
+		
+		_puzzle_slotshapes.forEach(function(itr,i) {
+			if (i == _solution_slotshapes.length) {
+				itr.set_line_style(Colors.Black, 4)
+				itr.set_alpha(1)
+			} else if (i < _solution_slotshapes.length) {
+				itr.set_alpha(0)
+			} else {
+				itr.set_line_style(Colors.Black, 2)
+				itr.set_alpha(0.25)
+			}
+			itr.draw()
+		})
+		
+		var hovered_slotshape
+		_choice_slotshapes.forEach(function(itr,i) {
+			var is_in_solution = _solution_slotshapes.indexOf(i) != -1
+			if (_solution_slotshapes.length < _puzzle_slotshapes.length && !is_in_solution && itr.contains_cursor()) {
+				hovered_slotshape = itr
+				itr.set_scale(1.05)
+				if (_g._input.mouse_just_pressed()) {
+					if (_g._input.key_pressed(16, false)) {
+						itr.rotate_left()
+					} else {
+						itr.rotate_right()
+					}
+					_total_clicks = _total_clicks + 1
+				}
+				
+				var current_puzzle_slotshape = _puzzle_slotshapes[_solution_slotshapes.length]
+				if (itr.slots().length == current_puzzle_slotshape.slots().length) {
+					
+					var all_found = true
+					for (var j = 0; j < itr.slots().length; j++) {
+						if (current_puzzle_slotshape.slots().indexOf(itr.slots()[j]) == -1) {
+							all_found = false
+							break
+						}
+					}
+					if (all_found) {
+						_solution_slotshapes.push(i)
+						hovered_slotshape = null
+					}
+				}
+			} else {
+				itr.set_scale(1)
+			}
+			if (!is_in_solution) {
+				itr.draw()
+			}
+		})
+		
+		if (hovered_slotshape) {
+			_render_selected_key_slotshape.slots().length = 0
+			hovered_slotshape.slots().forEach(function(itr) {
+				_render_selected_key_slotshape.slots().push(itr)
+			})
+			_render_selected_key_slotshape.set_scale(SPUtil.y_for_point_of_2pt_line(0,2 + 0.75,3,1 + 0.75,_solution_slotshapes.length))
+			_render_selected_key_slotshape.draw()
+		}
+		
+		_g._canvas.context().fillStyle = Colors.Black
+		_g._canvas.context().textAlign = "left"
+		_g._canvas.context().font = 'bold 24px sans-serif';
+		var time_fixed = _total_time_sec.toFixed(2)
+		if (_solution_slotshapes.length != _puzzle_slotshapes.length) {
+			_g._canvas.context().fillText(`Rotations:${_total_clicks} Time:${time_fixed}s`, 10, 590);
+		} else {
+			_g._canvas.context().fillText(`Solved in ${_total_clicks} and ${time_fixed}s`, 10, 590);
+		}
+		
+		
+		_g._input.update(_g)
+	},20);
+});
+</script>
+</head>
+
+<body>
+	<canvas id="game" width="1000px" height="600px" style="background-color:rgb(245,245,245)">
+	</canvas>
+	<br/>
+	Instructions: Click on a key above to rotate.<br/>Unlock as fast (and in as few clicks) as possible!<br/>Shift+Click to rotate left.
+	
+</body>
+</html>
