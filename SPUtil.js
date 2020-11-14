@@ -7,13 +7,6 @@ var Colors = {
 	Yellow: "rgb(255,255,0)"
 }
 
-var Controls = {
-	LEFT: 37,
-	UP: 38,
-	RIGHT: 39,
-	DOWN: 40
-}
-
 var SPUtil = {
 	clamp:function(val,min,max) {
 		return val < min ? min : (val > max ? max : val);

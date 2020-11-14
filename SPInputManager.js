@@ -5,6 +5,7 @@ function SPInputManager() {
 		_just_released : [],
 
 		_mouse_down : false,
+		_mouse_code : -1,
 		_mouse_just_pressed : false,
 		_mouse_just_released : false,
 		_mouse_position : {x:0,y:0},
@@ -50,12 +51,16 @@ function SPInputManager() {
 			return (ignore_focus || self.has_focus()) && self._just_released.indexOf(key) != -1; 
 		},
 		mouse_pressed:function() { return self._mouse_down; },
+		mouse_code: function() { return self._mouse_code; },
 		mouse_just_pressed:function() { return self._mouse_just_pressed; },
 		mouse_just_released:function() { return self._mouse_just_released; }
 	}
 	
 	window.addEventListener("keydown",function(evt) {
 		if (!self.has_focus()) return;
+		if (evt.keyCode == 32 && evt.target == document.body) {
+			evt.preventDefault();
+		}
 		if (self.__keydown_queue.indexOf(evt.keyCode) == -1) self.__keydown_queue.push(evt.keyCode);
 	});
 	window.addEventListener("keyup",function(evt) {
@@ -66,6 +71,7 @@ function SPInputManager() {
 			self._mouse_just_pressed = true;
 		}
 		self._mouse_down = true;
+		self._mouse_code = evt.which;
 		self._mouse_position.x = parseInt(evt.layerX);
 		self._mouse_position.y = parseInt(evt.layerY);
 	});

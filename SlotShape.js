@@ -51,7 +51,7 @@ var SlotShape = function(_g) {
 		return SPUtil.pt_dist(_g._input._mouse_position.x, _g._input._mouse_position.y, _position_x, _position_y) < _size * _scale
 	}
 	
-	self.draw = function() {
+	self.draw = function(render_slots) {
 		_context.save()
 		
 		_context.strokeStyle = _stroke_style
@@ -73,7 +73,7 @@ var SlotShape = function(_g) {
 		}
 		
 		if (_is_key) {
-			_slots.forEach(function(itr) {
+			render_slots.forEach(function(itr) {
 				_context.save()
 				var angle = (itr / MAX_LOCK_SLOT) * Math.PI * 2
 				_context.lineWidth = _line_width * 2
@@ -85,7 +85,7 @@ var SlotShape = function(_g) {
 				_context.restore()
 			})
 		} else {
-			_slots.forEach(function(itr) {
+			render_slots.forEach(function(itr) {
 				_context.save()
 				var angle = (itr / MAX_LOCK_SLOT) * Math.PI * 2
 				_context.translate(Math.cos(angle) * _size, Math.sin(angle) * _size)
