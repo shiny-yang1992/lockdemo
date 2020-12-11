@@ -22,46 +22,65 @@ $(function() {
 	};
 	
 	function easy_game() {
-		start_game(
-			"Easy",
-			2,
-			2,4,
-			2,
-			1,1,
-			true
-		)
+		$("#SLOTS_IN_RING").val(16)
+		$("#PUZZLE_SHAPE_COUNT").val(2)
+		$("#PUZZLE_SHAPE_SLOT_MIN_SIZE").val(2)
+		$("#PUZZLE_SHAPE_SLOT_MAX_SIZE").val(4)
+		$("#EXTRA_CHOICE_COUNT").val(2)
+		$("#EXTRA_CHOICE_SLOT_MIN_SIZE").val(1)
+		$("#EXTRA_CHOICE_SLOT_MAX_SIZE").val(1)
+		$("#DO_SHUFFLE_CHOICES").prop("checked", true)
+		load_game("Easy")
 	}
 	
 	function medium_game() {
-		start_game(
-			"Medium",
-			2,
-			2,4,
-			3,
-			2,4,
-			true
-		)
+		$("#SLOTS_IN_RING").val(16)
+		$("#PUZZLE_SHAPE_COUNT").val(2)
+		$("#PUZZLE_SHAPE_SLOT_MIN_SIZE").val(2)
+		$("#PUZZLE_SHAPE_SLOT_MAX_SIZE").val(4)
+		$("#EXTRA_CHOICE_COUNT").val(3)
+		$("#EXTRA_CHOICE_SLOT_MIN_SIZE").val(2)
+		$("#EXTRA_CHOICE_SLOT_MAX_SIZE").val(4)
+		$("#DO_SHUFFLE_CHOICES").prop("checked", true)
+		load_game("Medium")
 	}
 	
 	function hard_game() {
-		start_game(
-			"Hard",
-			4,
-			2,4,
-			4,
-			2,4,
-			true
-		)
+		$("#SLOTS_IN_RING").val(16)
+		$("#PUZZLE_SHAPE_COUNT").val(4)
+		$("#PUZZLE_SHAPE_SLOT_MIN_SIZE").val(2)
+		$("#PUZZLE_SHAPE_SLOT_MAX_SIZE").val(4)
+		$("#EXTRA_CHOICE_COUNT").val(4)
+		$("#EXTRA_CHOICE_SLOT_MIN_SIZE").val(2)
+		$("#EXTRA_CHOICE_SLOT_MAX_SIZE").val(4)
+		$("#DO_SHUFFLE_CHOICES").prop("checked", true)
+		load_game("Hard")
 	}
 	
 	function hardest_game() {
+		$("#SLOTS_IN_RING").val(16)
+		$("#PUZZLE_SHAPE_COUNT").val(3)
+		$("#PUZZLE_SHAPE_SLOT_MIN_SIZE").val(3)
+		$("#PUZZLE_SHAPE_SLOT_MAX_SIZE").val(5)
+		$("#EXTRA_CHOICE_COUNT").val(5)
+		$("#EXTRA_CHOICE_SLOT_MIN_SIZE").val(2)
+		$("#EXTRA_CHOICE_SLOT_MAX_SIZE").val(4)
+		$("#DO_SHUFFLE_CHOICES").prop("checked", true)
+		load_game("Hardest")
+	}
+	
+	function load_game(difficulty_name) {
+		$("#game").prop("width", parseInt($("#GAME_WIDTH").val()))
+		MAX_LOCK_SLOT = parseInt($("#SLOTS_IN_RING").val())
 		start_game(
-			"Hardest",
-			3,
-			3,5,
-			5,
-			2,4,
-			true
+			difficulty_name,
+			parseInt($("#PUZZLE_SHAPE_COUNT").val()),
+			parseInt($("#PUZZLE_SHAPE_SLOT_MIN_SIZE").val()),
+			parseInt($("#PUZZLE_SHAPE_SLOT_MAX_SIZE").val()),
+			parseInt($("#EXTRA_CHOICE_COUNT").val()),
+			parseInt($("#EXTRA_CHOICE_SLOT_MIN_SIZE").val()),
+			parseInt($("#EXTRA_CHOICE_SLOT_MAX_SIZE").val()),
+			$("#DO_SHUFFLE_CHOICES").prop("checked")
 		)
 	}
 	
@@ -69,6 +88,7 @@ $(function() {
 	$("#medium").click(function() { medium_game() })
 	$("#hard").click(function() { hard_game() })
 	$("#hardest").click(function() { hardest_game() })
+	$("#load_game_custom").click(function() { load_game("Custom") })
 	
 	easy_game()
 });
@@ -83,6 +103,7 @@ function start_game(
 	EXTRA_CHOICE_SLOT_MAX_SIZE,
 	DO_SHUFFLE_CHOICES
 ) {
+	_g._canvas = SPCanvas()
 	if (_g._active_timer) {
 		window.clearInterval(_g._active_timer)
 		_g._active_timer = null
@@ -343,6 +364,7 @@ function start_game(
 </head>
 
 <body>
+	Presets:
 	<button id="easy">easy</button>
 	<button id="medium">medium</button>
 	<button id="hard">hard</button>
@@ -352,6 +374,17 @@ function start_game(
 	</canvas>
 	<br/>
 	Instructions: Left/Right click on a key in the top row to rotate, space to insert the key.<br/>Solve the puzzle as fast and in as few clicks as possible!
-	
+	<br/><br/>
+	<button id="load_game_custom">Load game with custom settings</button><br/>
+	game width: <input type="number" id="GAME_WIDTH" value="1000" /> (default 1000) <br/>
+	slots in ring: <input type="number" id="SLOTS_IN_RING" value="16" /> (default 16) <br/>
+	puzzle ring count: <input type="number" id="PUZZLE_SHAPE_COUNT" value="4" /> <br/>
+	puzzle ring minimum slot number: <input type="number" id="PUZZLE_SHAPE_SLOT_MIN_SIZE" value="1" /> <br/> 
+	puzzle ring max slot number: <input type="number" id="PUZZLE_SHAPE_SLOT_MAX_SIZE" value="1" /> <br/> 
+	extra key count: <input type="number" id="EXTRA_CHOICE_COUNT" value = "0" /> <br/>
+	extra key minimum slot number: <input type="number" id="EXTRA_CHOICE_SLOT_MIN_SIZE" value = "0" /> <br/>
+	extra key max slot number: <input type="number" id="EXTRA_CHOICE_SLOT_MAX_SIZE" value = "0" /> <br/>
+	<label for="DO_SHUFFLE_CHOICES">shuffle keys:</label>
+	<input type="checkbox" id="DO_SHUFFLE_CHOICES" checked="checked"><br/>
 </body>
 </html>
