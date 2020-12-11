@@ -29,7 +29,6 @@ $(function() {
 		$("#EXTRA_CHOICE_COUNT").val(2)
 		$("#EXTRA_CHOICE_SLOT_MIN_SIZE").val(1)
 		$("#EXTRA_CHOICE_SLOT_MAX_SIZE").val(1)
-		$("#DO_SHUFFLE_CHOICES").prop("checked", true)
 		load_game("Easy")
 	}
 	
@@ -41,7 +40,6 @@ $(function() {
 		$("#EXTRA_CHOICE_COUNT").val(3)
 		$("#EXTRA_CHOICE_SLOT_MIN_SIZE").val(2)
 		$("#EXTRA_CHOICE_SLOT_MAX_SIZE").val(4)
-		$("#DO_SHUFFLE_CHOICES").prop("checked", true)
 		load_game("Medium")
 	}
 	
@@ -53,7 +51,6 @@ $(function() {
 		$("#EXTRA_CHOICE_COUNT").val(4)
 		$("#EXTRA_CHOICE_SLOT_MIN_SIZE").val(2)
 		$("#EXTRA_CHOICE_SLOT_MAX_SIZE").val(4)
-		$("#DO_SHUFFLE_CHOICES").prop("checked", true)
 		load_game("Hard")
 	}
 	
@@ -65,7 +62,6 @@ $(function() {
 		$("#EXTRA_CHOICE_COUNT").val(5)
 		$("#EXTRA_CHOICE_SLOT_MIN_SIZE").val(2)
 		$("#EXTRA_CHOICE_SLOT_MAX_SIZE").val(4)
-		$("#DO_SHUFFLE_CHOICES").prop("checked", true)
 		load_game("Hardest")
 	}
 	
@@ -80,6 +76,7 @@ $(function() {
 			parseInt($("#EXTRA_CHOICE_COUNT").val()),
 			parseInt($("#EXTRA_CHOICE_SLOT_MIN_SIZE").val()),
 			parseInt($("#EXTRA_CHOICE_SLOT_MAX_SIZE").val()),
+			parseInt($("#EXTRA_UNUSED_KEY_COUNT").val()),
 			$("#DO_SHUFFLE_CHOICES").prop("checked")
 		)
 	}
@@ -101,6 +98,7 @@ function start_game(
 	EXTRA_CHOICE_COUNT,
 	EXTRA_CHOICE_SLOT_MIN_SIZE,
 	EXTRA_CHOICE_SLOT_MAX_SIZE,
+	EXTRA_UNUSED_KEY_COUNT,
 	DO_SHUFFLE_CHOICES
 ) {
 	_g._canvas = SPCanvas()
@@ -204,6 +202,27 @@ function start_game(
 			j = j + 1
 		}
 	})
+	
+	for (var i = 0; i < EXTRA_UNUSED_KEY_COUNT; i++) {
+		var itr_slotshape = SlotShape(_g)
+		var available_slots = []
+		for (var j = 0; j < MAX_LOCK_SLOT; j++) {
+			available_slots.push(j)
+		}
+		for (var j = 0; j < SPUtil.rand_rangei(EXTRA_CHOICE_SLOT_MIN_SIZE, EXTRA_CHOICE_SLOT_MAX_SIZE); j++) {
+			var tar_i = SPUtil.rand_rangei(0,slots.length)
+			var tar_val = slots[tar_i]
+			available_slots.splice(tar_i,1)
+			if (itr_slotshape.slots().indexOf(tar_val) == -1) {
+				itr_slotshape.slots().push(tar_val)
+			}
+		}
+		for (var j = 0; j < SPUtil.rand_rangei(0, MAX_LOCK_SLOT); j++) {
+			itr_slotshape.rotate_right()
+		}
+		_choice_slotshapes.push(itr_slotshape)
+	}
+	
 	if (DO_SHUFFLE_CHOICES) {
 		SPUtil.array_shuffle(_choice_slotshapes)
 	}
@@ -379,11 +398,12 @@ function start_game(
 	game width: <input type="number" id="GAME_WIDTH" value="1000" /> (default 1000) <br/>
 	slots in ring: <input type="number" id="SLOTS_IN_RING" value="16" /> (default 16) <br/>
 	puzzle ring count: <input type="number" id="PUZZLE_SHAPE_COUNT" value="4" /> <br/>
-	puzzle ring minimum slot number: <input type="number" id="PUZZLE_SHAPE_SLOT_MIN_SIZE" value="1" /> <br/> 
-	puzzle ring max slot number: <input type="number" id="PUZZLE_SHAPE_SLOT_MAX_SIZE" value="1" /> <br/> 
+	designated key min slot count: <input type="number" id="PUZZLE_SHAPE_SLOT_MIN_SIZE" value="1" /> <br/> 
+	designated key max slot count: <input type="number" id="PUZZLE_SHAPE_SLOT_MAX_SIZE" value="1" /> <br/> 
 	extra key count: <input type="number" id="EXTRA_CHOICE_COUNT" value = "0" /> <br/>
-	extra key minimum slot number: <input type="number" id="EXTRA_CHOICE_SLOT_MIN_SIZE" value = "0" /> <br/>
-	extra key max slot number: <input type="number" id="EXTRA_CHOICE_SLOT_MAX_SIZE" value = "0" /> <br/>
+	extra key min slot count: <input type="number" id="EXTRA_CHOICE_SLOT_MIN_SIZE" value = "0" /> <br/>
+	extra key max slot count: <input type="number" id="EXTRA_CHOICE_SLOT_MAX_SIZE" value = "0" /> <br/>
+	unused extra key count: <input type="number" id="EXTRA_UNUSED_KEY_COUNT" value="0" /> <br/>
 	<label for="DO_SHUFFLE_CHOICES">shuffle keys:</label>
 	<input type="checkbox" id="DO_SHUFFLE_CHOICES" checked="checked"><br/>
 </body>
