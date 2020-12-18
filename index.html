@@ -170,8 +170,6 @@ function start_game(
 		_i_puzzle_slotshape_to_extra_key_count[i_puzzle_slotshape] = 1;
 	});
 	
-	console.log(MIN_KEYS_PER_RING, MAX_KEYS_PER_RING)
-	
 	// add extra keys to puzzle rings
 	_choice_additional_slotshapes.forEach(function(itr_additional_slotshape,i_itr_additional_slotshape) {
 		for (var i = 0; i < SPUtil.rand_rangei(0, MAX_LOCK_SLOT); i++) {
@@ -398,6 +396,7 @@ function start_game(
 			_render_selected_key_slotshape.set_scale(SPUtil.y_for_point_of_2pt_line(0,2 + 0.75,3,1 + 0.75,_i_current_puzzle_slotshape))
 			_render_selected_key_slotshape.draw(_render_selected_key_slotshape.slots())
 			
+			// activate hint
 			if (_g._input.key_just_pressed(81,true)) {
 				if (hovered_slotshape.has_activated_hint_color() == false) {
 					hovered_slotshape.activate_hint_color()
