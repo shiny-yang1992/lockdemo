@@ -24,44 +24,44 @@ $(function() {
 	function easy_game() {
 		$("#SLOTS_IN_RING").val(16)
 		$("#PUZZLE_SHAPE_COUNT").val(2)
-		$("#PUZZLE_SHAPE_SLOT_MIN_SIZE").val(2)
-		$("#PUZZLE_SHAPE_SLOT_MAX_SIZE").val(4)
+		$("#KEY_MIN_SIZE").val(1)
+		$("#KEY_MAX_SIZE").val(3)
 		$("#EXTRA_CHOICE_COUNT").val(2)
-		$("#EXTRA_CHOICE_SLOT_MIN_SIZE").val(1)
-		$("#EXTRA_CHOICE_SLOT_MAX_SIZE").val(1)
+		$("#MIN_KEYS_PER_RING").val(1)
+		$("#MAX_KEYS_PER_RING").val(3)
 		load_game("Easy")
 	}
 	
 	function medium_game() {
 		$("#SLOTS_IN_RING").val(16)
 		$("#PUZZLE_SHAPE_COUNT").val(2)
-		$("#PUZZLE_SHAPE_SLOT_MIN_SIZE").val(2)
-		$("#PUZZLE_SHAPE_SLOT_MAX_SIZE").val(4)
+		$("#KEY_MIN_SIZE").val(2)
+		$("#KEY_MAX_SIZE").val(4)
 		$("#EXTRA_CHOICE_COUNT").val(3)
-		$("#EXTRA_CHOICE_SLOT_MIN_SIZE").val(2)
-		$("#EXTRA_CHOICE_SLOT_MAX_SIZE").val(4)
+		$("#MIN_KEYS_PER_RING").val(1)
+		$("#MAX_KEYS_PER_RING").val(3)
 		load_game("Medium")
 	}
 	
 	function hard_game() {
 		$("#SLOTS_IN_RING").val(16)
 		$("#PUZZLE_SHAPE_COUNT").val(4)
-		$("#PUZZLE_SHAPE_SLOT_MIN_SIZE").val(2)
-		$("#PUZZLE_SHAPE_SLOT_MAX_SIZE").val(4)
+		$("#KEY_MIN_SIZE").val(2)
+		$("#KEY_MAX_SIZE").val(4)
 		$("#EXTRA_CHOICE_COUNT").val(4)
-		$("#EXTRA_CHOICE_SLOT_MIN_SIZE").val(2)
-		$("#EXTRA_CHOICE_SLOT_MAX_SIZE").val(4)
+		$("#MIN_KEYS_PER_RING").val(2)
+		$("#MAX_KEYS_PER_RING").val(4)
 		load_game("Hard")
 	}
 	
 	function hardest_game() {
 		$("#SLOTS_IN_RING").val(16)
 		$("#PUZZLE_SHAPE_COUNT").val(3)
-		$("#PUZZLE_SHAPE_SLOT_MIN_SIZE").val(3)
-		$("#PUZZLE_SHAPE_SLOT_MAX_SIZE").val(5)
+		$("#KEY_MIN_SIZE").val(2)
+		$("#KEY_MAX_SIZE").val(4)
 		$("#EXTRA_CHOICE_COUNT").val(5)
-		$("#EXTRA_CHOICE_SLOT_MIN_SIZE").val(2)
-		$("#EXTRA_CHOICE_SLOT_MAX_SIZE").val(4)
+		$("#MIN_KEYS_PER_RING").val(3)
+		$("#MAX_KEYS_PER_RING").val(5)
 		load_game("Hardest")
 	}
 	
@@ -71,13 +71,11 @@ $(function() {
 		start_game(
 			difficulty_name,
 			parseInt($("#PUZZLE_SHAPE_COUNT").val()),
-			parseInt($("#PUZZLE_SHAPE_SLOT_MIN_SIZE").val()),
-			parseInt($("#PUZZLE_SHAPE_SLOT_MAX_SIZE").val()),
+			parseInt($("#KEY_MIN_SIZE").val()),
+			parseInt($("#KEY_MAX_SIZE").val()),
 			parseInt($("#EXTRA_CHOICE_COUNT").val()),
-			parseInt($("#EXTRA_CHOICE_SLOT_MIN_SIZE").val()),
-			parseInt($("#EXTRA_CHOICE_SLOT_MAX_SIZE").val()),
-			parseInt($("#EXTRA_UNUSED_KEY_COUNT").val()),
-			$("#DO_SHUFFLE_CHOICES").prop("checked")
+			parseInt($("#MIN_KEYS_PER_RING").val()),
+			parseInt($("#MAX_KEYS_PER_RING").val())
 		)
 	}
 	
@@ -93,13 +91,11 @@ $(function() {
 function start_game(
 	DIFFICULTY_NAME,
 	PUZZLE_SHAPE_COUNT, 
-	PUZZLE_SHAPE_SLOT_MIN_SIZE, 
-	PUZZLE_SHAPE_SLOT_MAX_SIZE, 
+	KEY_MIN_SIZE, 
+	KEY_MAX_SIZE, 
 	EXTRA_CHOICE_COUNT,
-	EXTRA_CHOICE_SLOT_MIN_SIZE,
-	EXTRA_CHOICE_SLOT_MAX_SIZE,
-	EXTRA_UNUSED_KEY_COUNT,
-	DO_SHUFFLE_CHOICES
+	MIN_KEYS_PER_RING,
+	MAX_KEYS_PER_RING
 ) {
 	_g._canvas = SPCanvas()
 	if (_g._active_timer) {
@@ -108,11 +104,15 @@ function start_game(
 	}
 	var _total_time_sec = 0
 	var _total_clicks = 0
+	var _total_hints_used = 0
 		
 	var _puzzle_slotshapes = []
 	var _puzzle_base_slotshapes = []
+	
+	// create puzzle rings
 	for (var i = 0; i < PUZZLE_SHAPE_COUNT; i++) {
 		var itr_slotshape = SlotShape(_g)
+		itr_slotshape.set_hint_index(i)
 		itr_slotshape.set_position(500, 400)
 		itr_slotshape.set_scale(SPUtil.y_for_point_of_2pt_line(0,2,3,1,i))
 		
@@ -120,7 +120,7 @@ function start_game(
 		for (var j = 0; j < MAX_LOCK_SLOT; j++) {
 			slots.push(j)
 		}
-		for (var j = 0; j < SPUtil.rand_rangei(PUZZLE_SHAPE_SLOT_MIN_SIZE, PUZZLE_SHAPE_SLOT_MAX_SIZE); j++) {
+		for (var j = 0; j < SPUtil.rand_rangei(KEY_MIN_SIZE, KEY_MAX_SIZE); j++) {
 			var tar_i = SPUtil.rand_rangei(0,slots.length)
 			var tar_val = slots[tar_i]
 			slots.splice(tar_i,1)
@@ -132,9 +132,11 @@ function start_game(
 		_puzzle_base_slotshapes.push(itr_slotshape)
 	}
 	
+	// create designated keys
 	var _choice_slotshapes = []
-	_puzzle_slotshapes.forEach(function(src_slotshape) {
+	_puzzle_slotshapes.forEach(function(src_slotshape,i) {
 		var itr_slotshape = SlotShape(_g)
+		itr_slotshape.set_hint_index(src_slotshape.get_hint_index())
 		src_slotshape.slots().forEach(function(itr_slot) {
 			if (itr_slotshape.slots().indexOf(itr_slot) == -1) {
 				itr_slotshape.slots().push(itr_slot)
@@ -142,6 +144,8 @@ function start_game(
 		})
 		_choice_slotshapes.push(itr_slotshape)
 	})
+	
+	// create extra keys
 	var _choice_additional_slotshapes = []
 	for (var i = 0; i < EXTRA_CHOICE_COUNT; i++) {
 		var itr_slotshape = SlotShape(_g)
@@ -149,7 +153,7 @@ function start_game(
 		for (var j = 0; j < MAX_LOCK_SLOT; j++) {
 			available_slots.push(j)
 		}
-		for (var j = 0; j < SPUtil.rand_rangei(EXTRA_CHOICE_SLOT_MIN_SIZE, EXTRA_CHOICE_SLOT_MAX_SIZE); j++) {
+		for (var j = 0; j < SPUtil.rand_rangei(KEY_MIN_SIZE, KEY_MAX_SIZE); j++) {
 			var tar_i = SPUtil.rand_rangei(0,slots.length)
 			var tar_val = slots[tar_i]
 			available_slots.splice(tar_i,1)
@@ -160,10 +164,44 @@ function start_game(
 		_choice_additional_slotshapes.push(itr_slotshape)
 		_choice_slotshapes.push(itr_slotshape)
 	}
+	
+	var _i_puzzle_slotshape_to_extra_key_count = {}
+	_puzzle_slotshapes.forEach(function(itr_puzzle_slotshape,i_puzzle_slotshape) {
+		_i_puzzle_slotshape_to_extra_key_count[i_puzzle_slotshape] = 1;
+	});
+	
+	console.log(MIN_KEYS_PER_RING, MAX_KEYS_PER_RING)
+	
+	// add extra keys to puzzle rings
 	_choice_additional_slotshapes.forEach(function(itr_additional_slotshape,i_itr_additional_slotshape) {
 		for (var i = 0; i < SPUtil.rand_rangei(0, MAX_LOCK_SLOT); i++) {
 			itr_additional_slotshape.rotate_right()
 		}
+		
+		function pick_puzzle_slotshape_i_to_add_to() {
+			var choices = []
+			
+			// fill any under min
+			_puzzle_slotshapes.forEach(function(itr_puzzle_slotshape,i_puzzle_slotshape) {
+				var itr_extra_key_count = _i_puzzle_slotshape_to_extra_key_count[i_puzzle_slotshape]
+				if (itr_extra_key_count < MIN_KEYS_PER_RING) {
+					choices.push(i_puzzle_slotshape)
+				}
+			})
+			if (choices.length > 0) { return choices[SPUtil.rand_rangei(0,choices.length)] }
+			
+			// fill any under max
+			_puzzle_slotshapes.forEach(function(itr_puzzle_slotshape,i_puzzle_slotshape) {
+				var itr_extra_key_count = _i_puzzle_slotshape_to_extra_key_count[i_puzzle_slotshape]
+				if (itr_extra_key_count < MAX_KEYS_PER_RING) {
+					choices.push(i_puzzle_slotshape)
+				}
+			})
+			if (choices.length > 0) { return choices[SPUtil.rand_rangei(0,choices.length)] }
+			
+			return -1
+		}
+		
 		function can_merge_additional_slotshape(puzzle_slotshape) {
 			var can_merge = true
 			itr_additional_slotshape.slots().forEach(function(itr_slot) {
@@ -178,17 +216,14 @@ function start_game(
 			})
 			return can_merge
 		}
+		
 		var j = 0;
-		while (j < 100) {
-			var i_puzzle_slotshape = SPUtil.rand_rangei(0,_puzzle_base_slotshapes.length)
-			if (!DO_SHUFFLE_CHOICES) {
-				if (i_itr_additional_slotshape < _puzzle_base_slotshapes.length) {
-					i_puzzle_slotshape = i_itr_additional_slotshape
-				} else {
-					i_puzzle_slotshape = _puzzle_base_slotshapes.length - 1
-				}
+		while (j < MAX_LOCK_SLOT) {
+			var i_puzzle_slotshape = pick_puzzle_slotshape_i_to_add_to()
+			if (i_puzzle_slotshape < 0) {
+				//No available target found, don't merge
+				break
 			}
-			
 			var puzzle_slotshape = _puzzle_base_slotshapes[i_puzzle_slotshape]
 			if (can_merge_additional_slotshape(puzzle_slotshape)) {
 				itr_additional_slotshape.slots().forEach(function(itr_slot) {
@@ -196,6 +231,8 @@ function start_game(
 						puzzle_slotshape.slots().push(itr_slot)
 					}
 				})
+				_i_puzzle_slotshape_to_extra_key_count[i_puzzle_slotshape]++
+				itr_additional_slotshape.set_hint_index(puzzle_slotshape.get_hint_index())
 				break
 			}
 			itr_additional_slotshape.rotate_right()
@@ -203,29 +240,7 @@ function start_game(
 		}
 	})
 	
-	for (var i = 0; i < EXTRA_UNUSED_KEY_COUNT; i++) {
-		var itr_slotshape = SlotShape(_g)
-		var available_slots = []
-		for (var j = 0; j < MAX_LOCK_SLOT; j++) {
-			available_slots.push(j)
-		}
-		for (var j = 0; j < SPUtil.rand_rangei(EXTRA_CHOICE_SLOT_MIN_SIZE, EXTRA_CHOICE_SLOT_MAX_SIZE); j++) {
-			var tar_i = SPUtil.rand_rangei(0,slots.length)
-			var tar_val = slots[tar_i]
-			available_slots.splice(tar_i,1)
-			if (itr_slotshape.slots().indexOf(tar_val) == -1) {
-				itr_slotshape.slots().push(tar_val)
-			}
-		}
-		for (var j = 0; j < SPUtil.rand_rangei(0, MAX_LOCK_SLOT); j++) {
-			itr_slotshape.rotate_right()
-		}
-		_choice_slotshapes.push(itr_slotshape)
-	}
-	
-	if (DO_SHUFFLE_CHOICES) {
-		SPUtil.array_shuffle(_choice_slotshapes)
-	}
+	SPUtil.array_shuffle(_choice_slotshapes)
 	_choice_slotshapes.forEach(function(itr,i) {
 		itr.set_position(75 + i*120, 75)
 		itr.set_is_key(true)
@@ -253,22 +268,26 @@ function start_game(
 	copy_current_puzzle_slotshape_remaining_slots()
 	
 	var _last_time = Date.now()
-	_g._active_timer = window.setInterval(function() {
+	function game_update() {
 		var current_time = Date.now()
-		var time_delta_sec = (current_time - _last_time) / 1000 
+		var time_delta_sec = (current_time - _last_time) / 1000
+		var dt_scale = SPUtil.delta_time_to_timescale(time_delta_sec)
 		if (_i_current_puzzle_slotshape != _puzzle_slotshapes.length) {
 			_total_time_sec = _total_time_sec + time_delta_sec
 		}
 		_last_time = current_time
 		_g._canvas.clear()
 		
-		if (_g._input.key_just_pressed(82, false)) {
+		//reset
+		if (_g._input.key_just_pressed(82, true)) {
 			_i_used_choice_slotshapes.length = 0
 			_current_puzzle_remaining_slots.length = 0
 			_i_current_puzzle_slotshape = 0
 			copy_current_puzzle_slotshape_remaining_slots()
 		}
-		if (_g._input.key_just_pressed(90, false) && _i_used_choice_slotshapes.length > 0 && (_i_current_puzzle_slotshape != _puzzle_slotshapes.length)) {
+				
+		//undo
+		if (_g._input.key_just_pressed(90, true) && _i_used_choice_slotshapes.length > 0 && (_i_current_puzzle_slotshape != _puzzle_slotshapes.length)) {
 			var current_puzzle_slotshape_length = 0
 			if (_puzzle_slotshapes[_i_current_puzzle_slotshape]) {
 				current_puzzle_slotshape_length = _puzzle_slotshapes[_i_current_puzzle_slotshape].slots().length
@@ -277,19 +296,26 @@ function start_game(
 				_i_current_puzzle_slotshape = _i_current_puzzle_slotshape - 1
 				_current_puzzle_remaining_slots.length = 0
 			}
-			_choice_slotshapes[_i_used_choice_slotshapes.pop()].slots().forEach(function(itr) {
+			var undo_choice_slotshape = _choice_slotshapes[_i_used_choice_slotshapes.pop()]
+			undo_choice_slotshape.slots().forEach(function(itr) {
 				_current_puzzle_remaining_slots.push(itr)
 			})
+			undo_choice_slotshape.set_anim_scale(1.2)
+			
+			if (_puzzle_slotshapes[_i_current_puzzle_slotshape]) {
+				_puzzle_slotshapes[_i_current_puzzle_slotshape].set_anim_scale(0.95)
+			}
 		}
 		
 		_puzzle_slotshapes.forEach(function(itr,i) {
+			itr.update(dt_scale)
 			if (i == _i_current_puzzle_slotshape) {
-				itr.set_line_style(Colors.Black, 4)
+				itr.set_line_thickness(4)
 				itr.set_alpha(1)
 				itr.draw(_current_puzzle_remaining_slots)
 			} else if (i < _i_current_puzzle_slotshape) {
 			} else {
-				itr.set_line_style(Colors.Black, 2)
+				itr.set_line_thickness(2)
 				itr.set_alpha(0.25)
 				itr.draw(itr.slots())
 			}
@@ -297,6 +323,7 @@ function start_game(
 		
 		var hovered_slotshape
 		_choice_slotshapes.forEach(function(itr,i) {
+			itr.update(dt_scale)
 			var is_in_solution = _i_used_choice_slotshapes.indexOf(i) != -1
 			if (_i_current_puzzle_slotshape < _puzzle_slotshapes.length && !is_in_solution && itr.contains_cursor()) {
 				hovered_slotshape = itr
@@ -307,6 +334,8 @@ function start_game(
 					} else {
 						itr.rotate_left()
 					}
+					itr.set_anim_scale(1.025)
+					_render_selected_key_slotshape.set_anim_scale(1.015)
 					_total_clicks = _total_clicks + 1
 				}
 				
@@ -328,9 +357,12 @@ function start_game(
 						_g._canvas.context().font = '16px sans-serif';
 						_g._canvas.context().fillText(`Press 'Space' to Insert`, 500, 590);
 						
-						if (_g._input.key_pressed(32, false)) {
+						//insert key
+						if (_g._input.key_just_pressed(32, false)) {
 							_i_used_choice_slotshapes.push(i)
 							hovered_slotshape = null
+							
+							current_puzzle_slotshape.set_anim_scale(1.05)
 							
 							itr.slots().forEach(function(itr_slot) {
 								_current_puzzle_remaining_slots.splice(_current_puzzle_remaining_slots.indexOf(itr_slot), 1)
@@ -357,26 +389,61 @@ function start_game(
 			hovered_slotshape.slots().forEach(function(itr) {
 				_render_selected_key_slotshape.slots().push(itr)
 			})
+			if (hovered_slotshape.has_activated_hint_color()) {
+				_render_selected_key_slotshape.set_hint_index(hovered_slotshape.get_hint_index())
+			} else {
+				_render_selected_key_slotshape.set_hint_index(-1)
+			}
+			_render_selected_key_slotshape.activate_hint_color()
 			_render_selected_key_slotshape.set_scale(SPUtil.y_for_point_of_2pt_line(0,2 + 0.75,3,1 + 0.75,_i_current_puzzle_slotshape))
 			_render_selected_key_slotshape.draw(_render_selected_key_slotshape.slots())
+			
+			if (_g._input.key_just_pressed(81,true)) {
+				if (hovered_slotshape.has_activated_hint_color() == false) {
+					hovered_slotshape.activate_hint_color()
+					_puzzle_slotshapes.forEach(function(itr_puzzle_slotshape) {
+						if (itr_puzzle_slotshape.get_hint_index() == hovered_slotshape.get_hint_index()) {
+							itr_puzzle_slotshape.activate_hint_color()
+							itr_puzzle_slotshape.set_anim_scale(1.05)
+						}
+					})
+					
+					_total_hints_used++;
+				}
+				_render_selected_key_slotshape.set_anim_scale(1.2)
+				hovered_slotshape.set_anim_scale(1.4)
+			}
 		}
+		_render_selected_key_slotshape.update(dt_scale)
 		
 		_g._canvas.context().fillStyle = Colors.Black
 		_g._canvas.context().textAlign = "left"
 		_g._canvas.context().font = 'bold 24px sans-serif';
 		var time_fixed = _total_time_sec.toFixed(2)
-		_g._canvas.context().fillText(`Difficulty:${DIFFICULTY_NAME}`, 10, 565);
+		_g._canvas.context().fillText(`Difficulty:${DIFFICULTY_NAME}`, 10, 540);
+		_g._canvas.context().fillText(`Rotations:${_total_clicks} Hints:${_total_hints_used}`, 10, 565)
 		if (_i_current_puzzle_slotshape != _puzzle_slotshapes.length) {
-			_g._canvas.context().fillText(`Rotations:${_total_clicks} Time:${time_fixed}s`, 10, 590);
+			_g._canvas.context().fillText(`Time:${time_fixed}s`, 10, 590);
 		} else {
-			_g._canvas.context().fillText(`Solved in ${_total_clicks} Rotations and ${time_fixed}s`, 10, 590);
+			_g._canvas.context().fillText(`Solved ${time_fixed}s`, 10, 590);
 		}
 		_g._canvas.context().textAlign = "right"
 		_g._canvas.context().font = 'bold 24px sans-serif';
 		_g._canvas.context().fillText(`Press Z to undo`, 990, 565);
 		_g._canvas.context().fillText(`Press R to reset`, 990, 590);
+		_g._canvas.context().fillText(`Press Q to use a hint on a key`, 990, 540);
 		
 		_g._input.update(_g)
+	}
+	
+	_g._active_timer = window.setInterval(function() {
+		try {
+			game_update()
+		} catch (err) {
+			window.clearInterval(_g._active_timer)
+			_g._active_timer = null
+			throw err
+		}
 	},20);
 }
 </script>
@@ -398,13 +465,10 @@ function start_game(
 	game width: <input type="number" id="GAME_WIDTH" value="1000" /> (default 1000) <br/>
 	slots in ring: <input type="number" id="SLOTS_IN_RING" value="16" /> (default 16) <br/>
 	puzzle ring count: <input type="number" id="PUZZLE_SHAPE_COUNT" value="4" /> <br/>
-	designated key min slot count: <input type="number" id="PUZZLE_SHAPE_SLOT_MIN_SIZE" value="1" /> <br/> 
-	designated key max slot count: <input type="number" id="PUZZLE_SHAPE_SLOT_MAX_SIZE" value="1" /> <br/> 
 	extra key count: <input type="number" id="EXTRA_CHOICE_COUNT" value = "0" /> <br/>
-	extra key min slot count: <input type="number" id="EXTRA_CHOICE_SLOT_MIN_SIZE" value = "0" /> <br/>
-	extra key max slot count: <input type="number" id="EXTRA_CHOICE_SLOT_MAX_SIZE" value = "0" /> <br/>
-	unused extra key count: <input type="number" id="EXTRA_UNUSED_KEY_COUNT" value="0" /> <br/>
-	<label for="DO_SHUFFLE_CHOICES">shuffle keys:</label>
-	<input type="checkbox" id="DO_SHUFFLE_CHOICES" checked="checked"><br/>
+	key min size: <input type="number" id="KEY_MIN_SIZE" value="1" /> <br/> 
+	key max size: <input type="number" id="KEY_MAX_SIZE" value="1" /> <br/> 
+	min keys per ring: <input type="number" id="MIN_KEYS_PER_RING" value="1" /> <br/> 
+	max keys per ring: <input type="number" id="MAX_KEYS_PER_RING" value="10" /> <br/> 
 </body>
 </html>

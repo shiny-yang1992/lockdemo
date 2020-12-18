@@ -7,7 +7,44 @@ var Colors = {
 	Yellow: "rgb(255,255,0)"
 }
 
-var SPUtil = {
+var DEFAULT_THRESHOLD = 0.01
+var TARGET_FPS = 60.0
+
+var SPUtil
+SPUtil = {
+	expt_value_in_seconds:function(threshold, start, seconds) {
+			return 1 - Math.pow((threshold / start), 1 / (TARGET_FPS * seconds))
+	},
+	normalized_default_expt_value_in_seconds:function(seconds) {
+			return SPUtil.expt_value_in_seconds(DEFAULT_THRESHOLD, 1, seconds)
+	},
+	exptvsec:function(seconds) {
+		return SPUtil.normalized_default_expt_value_in_seconds(seconds)
+	},
+	expt_sec:function(start,to,sec,dt_scale) {
+		return SPUtil.expt(start,to,SPUtil.exptvsec(sec),dt_scale)
+	},
+	delta_time_to_timescale:function(s_frame_delta_time) {
+		return s_frame_delta_time / (1.0 / TARGET_FPS)
+	},
+	timescale_to_delta_time:function(dt_scale) {
+		return dt_scale * (1.0 / TARGET_FPS)
+	},
+	expt:function(start, to, pct, dt_scale) {
+		if (Math.abs(to - start) < DEFAULT_THRESHOLD) {
+			return to
+		}
+		var y = SPUtil.expty(start,to,pct,dt_scale)
+		//rtv = start + (to - start) * timescaled_friction
+		var delta = (to - start) * y
+		return start + delta
+	},
+	expty:function(start,to,pct,dt_scale) {
+		//y = e ^ (-a * timescale)
+		var friction = 1 - pct
+		var a = -Math.log(friction)
+		return 1 - Math.exp(-a * dt_scale)
+	},
 	clamp:function(val,min,max) {
 		return val < min ? min : (val > max ? max : val);
 	},
