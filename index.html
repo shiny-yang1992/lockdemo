@@ -26,9 +26,11 @@ $(function() {
 		$("#PUZZLE_SHAPE_COUNT").val(2)
 		$("#KEY_MIN_SIZE").val(1)
 		$("#KEY_MAX_SIZE").val(3)
-		$("#EXTRA_CHOICE_COUNT").val(2)
-		$("#MIN_KEYS_PER_RING").val(1)
-		$("#MAX_KEYS_PER_RING").val(3)
+		$("#KEY_COUNT").val(4)
+		//$("#MIN_KEYS_PER_RING").val(1)
+		//$("#MAX_KEYS_PER_RING").val(3)
+		$("#MIN_SLOTS_PER_RING").val(1)
+		$("#MAX_SLOTS_PER_RING").val(6)
 		load_game("Easy")
 	}
 	
@@ -37,9 +39,11 @@ $(function() {
 		$("#PUZZLE_SHAPE_COUNT").val(2)
 		$("#KEY_MIN_SIZE").val(2)
 		$("#KEY_MAX_SIZE").val(4)
-		$("#EXTRA_CHOICE_COUNT").val(3)
-		$("#MIN_KEYS_PER_RING").val(1)
-		$("#MAX_KEYS_PER_RING").val(3)
+		$("#KEY_COUNT").val(5)
+		//$("#MIN_KEYS_PER_RING").val(1)
+		//$("#MAX_KEYS_PER_RING").val(3)
+		$("#MIN_SLOTS_PER_RING").val(4)
+		$("#MAX_SLOTS_PER_RING").val(8)
 		load_game("Medium")
 	}
 	
@@ -48,9 +52,11 @@ $(function() {
 		$("#PUZZLE_SHAPE_COUNT").val(4)
 		$("#KEY_MIN_SIZE").val(2)
 		$("#KEY_MAX_SIZE").val(4)
-		$("#EXTRA_CHOICE_COUNT").val(4)
-		$("#MIN_KEYS_PER_RING").val(2)
-		$("#MAX_KEYS_PER_RING").val(4)
+		$("#KEY_COUNT").val(8)
+		//$("#MIN_KEYS_PER_RING").val(2)
+		//$("#MAX_KEYS_PER_RING").val(4)
+		$("#MIN_SLOTS_PER_RING").val(4)
+		$("#MAX_SLOTS_PER_RING").val(10)
 		load_game("Hard")
 	}
 	
@@ -59,23 +65,34 @@ $(function() {
 		$("#PUZZLE_SHAPE_COUNT").val(3)
 		$("#KEY_MIN_SIZE").val(2)
 		$("#KEY_MAX_SIZE").val(4)
-		$("#EXTRA_CHOICE_COUNT").val(5)
-		$("#MIN_KEYS_PER_RING").val(3)
-		$("#MAX_KEYS_PER_RING").val(5)
+		$("#KEY_COUNT").val(8)
+		//$("#MIN_KEYS_PER_RING").val(3)
+		//$("#MAX_KEYS_PER_RING").val(5)
+		$("#MIN_SLOTS_PER_RING").val(4)
+		$("#MAX_SLOTS_PER_RING").val(10)
 		load_game("Hardest")
 	}
 	
 	function load_game(difficulty_name) {
 		$("#game").prop("width", parseInt($("#GAME_WIDTH").val()))
 		MAX_LOCK_SLOT = parseInt($("#SLOTS_IN_RING").val())
+		var puzzle_shape_count = parseInt($("#PUZZLE_SHAPE_COUNT").val())
+		var key_count = parseInt($("#KEY_COUNT").val()) 
+		var extra_choice_count = key_count - puzzle_shape_count
+		if (extra_choice_count < 0) {
+			extra_choice_count = 0
+			$("#KEY_COUNT").val(puzzle_shape_count)
+		}
 		start_game(
 			difficulty_name,
-			parseInt($("#PUZZLE_SHAPE_COUNT").val()),
+			puzzle_shape_count,
 			parseInt($("#KEY_MIN_SIZE").val()),
 			parseInt($("#KEY_MAX_SIZE").val()),
-			parseInt($("#EXTRA_CHOICE_COUNT").val()),
+			extra_choice_count,
 			parseInt($("#MIN_KEYS_PER_RING").val()),
-			parseInt($("#MAX_KEYS_PER_RING").val())
+			parseInt($("#MAX_KEYS_PER_RING").val()),
+			parseInt($("#MIN_SLOTS_PER_RING").val()),
+			parseInt($("#MAX_SLOTS_PER_RING").val())
 		)
 	}
 	
@@ -95,7 +112,9 @@ function start_game(
 	KEY_MAX_SIZE, 
 	EXTRA_CHOICE_COUNT,
 	MIN_KEYS_PER_RING,
-	MAX_KEYS_PER_RING
+	MAX_KEYS_PER_RING,
+	MIN_SLOTS_PER_RING,
+	MAX_SLOTS_PER_RING
 ) {
 	_g._canvas = SPCanvas()
 	if (_g._active_timer) {
@@ -105,6 +124,7 @@ function start_game(
 	var _total_time_sec = 0
 	var _total_clicks = 0
 	var _total_hints_used = 0
+	var _total_undos_used = 0
 		
 	var _puzzle_slotshapes = []
 	var _puzzle_base_slotshapes = []
@@ -182,7 +202,7 @@ function start_game(
 			// fill any under min
 			_puzzle_slotshapes.forEach(function(itr_puzzle_slotshape,i_puzzle_slotshape) {
 				var itr_extra_key_count = _i_puzzle_slotshape_to_extra_key_count[i_puzzle_slotshape]
-				if (itr_extra_key_count < MIN_KEYS_PER_RING) {
+				if (itr_extra_key_count < MIN_KEYS_PER_RING && itr_puzzle_slotshape.slots().length < MIN_SLOTS_PER_RING) {
 					choices.push(i_puzzle_slotshape)
 				}
 			})
@@ -191,7 +211,7 @@ function start_game(
 			// fill any under max
 			_puzzle_slotshapes.forEach(function(itr_puzzle_slotshape,i_puzzle_slotshape) {
 				var itr_extra_key_count = _i_puzzle_slotshape_to_extra_key_count[i_puzzle_slotshape]
-				if (itr_extra_key_count < MAX_KEYS_PER_RING) {
+				if (itr_extra_key_count < MAX_KEYS_PER_RING && itr_puzzle_slotshape.slots().length < MAX_SLOTS_PER_RING) {
 					choices.push(i_puzzle_slotshape)
 				}
 			})
@@ -303,6 +323,7 @@ function start_game(
 			if (_puzzle_slotshapes[_i_current_puzzle_slotshape]) {
 				_puzzle_slotshapes[_i_current_puzzle_slotshape].set_anim_scale(0.95)
 			}
+			_total_undos_used++
 		}
 		
 		_puzzle_slotshapes.forEach(function(itr,i) {
@@ -396,7 +417,7 @@ function start_game(
 			_render_selected_key_slotshape.set_scale(SPUtil.y_for_point_of_2pt_line(0,2 + 0.75,3,1 + 0.75,_i_current_puzzle_slotshape))
 			_render_selected_key_slotshape.draw(_render_selected_key_slotshape.slots())
 			
-			// activate hint
+			// activate hint on hovered key
 			if (_g._input.key_just_pressed(81,true)) {
 				if (hovered_slotshape.has_activated_hint_color() == false) {
 					hovered_slotshape.activate_hint_color()
@@ -407,10 +428,31 @@ function start_game(
 						}
 					})
 					
-					_total_hints_used++;
+					_total_hints_used++
 				}
 				_render_selected_key_slotshape.set_anim_scale(1.2)
 				hovered_slotshape.set_anim_scale(1.4)
+			}
+		} else {
+			// activate hint on current puzzle ring
+			if (_g._input.key_just_pressed(81,true)) {
+				if (_puzzle_slotshapes[_i_current_puzzle_slotshape]) {
+					var current_puzzle_slotshape = _puzzle_slotshapes[_i_current_puzzle_slotshape]
+					var found = false
+					_choice_slotshapes.forEach(function(itr_choice_slotshape,i_choice_slotshape) {
+						var is_in_solution = _i_used_choice_slotshapes.indexOf(i_choice_slotshape) != -1
+						if (!found && !is_in_solution) {
+							if (!itr_choice_slotshape.has_activated_hint_color() && current_puzzle_slotshape.get_hint_index() == itr_choice_slotshape.get_hint_index()) {
+								found = true
+								current_puzzle_slotshape.set_anim_scale(1.05)
+								current_puzzle_slotshape.activate_hint_color()
+								itr_choice_slotshape.set_anim_scale(1.2)
+								itr_choice_slotshape.activate_hint_color()
+								_total_hints_used++
+							}
+						}
+					});
+				}
 			}
 		}
 		_render_selected_key_slotshape.update(dt_scale)
@@ -420,7 +462,7 @@ function start_game(
 		_g._canvas.context().font = 'bold 24px sans-serif';
 		var time_fixed = _total_time_sec.toFixed(2)
 		_g._canvas.context().fillText(`Difficulty:${DIFFICULTY_NAME}`, 10, 540);
-		_g._canvas.context().fillText(`Rotations:${_total_clicks} Hints:${_total_hints_used}`, 10, 565)
+		_g._canvas.context().fillText(`Rotations:${_total_clicks} Hints:${_total_hints_used} Undos:${_total_undos_used}`, 10, 565)
 		if (_i_current_puzzle_slotshape != _puzzle_slotshapes.length) {
 			_g._canvas.context().fillText(`Time:${time_fixed}s`, 10, 590);
 		} else {
@@ -430,7 +472,7 @@ function start_game(
 		_g._canvas.context().font = 'bold 24px sans-serif';
 		_g._canvas.context().fillText(`Press Z to undo`, 990, 565);
 		_g._canvas.context().fillText(`Press R to reset`, 990, 590);
-		_g._canvas.context().fillText(`Press Q to use a hint on a key`, 990, 540);
+		_g._canvas.context().fillText(`Press Q to use a hint`, 990, 540);
 		
 		_g._input.update(_g)
 	}
@@ -464,10 +506,12 @@ function start_game(
 	game width: <input type="number" id="GAME_WIDTH" value="1000" /> (default 1000) <br/>
 	slots in ring: <input type="number" id="SLOTS_IN_RING" value="16" /> (default 16) <br/>
 	puzzle ring count: <input type="number" id="PUZZLE_SHAPE_COUNT" value="4" /> <br/>
-	extra key count: <input type="number" id="EXTRA_CHOICE_COUNT" value = "0" /> <br/>
+	key count: <input type="number" id="KEY_COUNT" value = "4" /> <br/>
+	min slots per ring: <input type="number" id="MIN_SLOTS_PER_RING" value="1" /> <br/> 
+	max slots per ring: <input type="number" id="MAX_SLOTS_PER_RING" value="16" /> <br/>
+	min keys per ring: <input type="number" id="MIN_KEYS_PER_RING" value="1" /> <br/> 
+	max keys per ring: <input type="number" id="MAX_KEYS_PER_RING" value="16" /> <br/>
 	key min size: <input type="number" id="KEY_MIN_SIZE" value="1" /> <br/> 
 	key max size: <input type="number" id="KEY_MAX_SIZE" value="1" /> <br/> 
-	min keys per ring: <input type="number" id="MIN_KEYS_PER_RING" value="1" /> <br/> 
-	max keys per ring: <input type="number" id="MAX_KEYS_PER_RING" value="10" /> <br/> 
 </body>
 </html>
