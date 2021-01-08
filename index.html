@@ -202,7 +202,7 @@ function start_game(
 			// fill any under min
 			_puzzle_slotshapes.forEach(function(itr_puzzle_slotshape,i_puzzle_slotshape) {
 				var itr_extra_key_count = _i_puzzle_slotshape_to_extra_key_count[i_puzzle_slotshape]
-				if (itr_extra_key_count < MIN_KEYS_PER_RING && itr_puzzle_slotshape.slots().length < MIN_SLOTS_PER_RING) {
+				if (itr_extra_key_count < MIN_KEYS_PER_RING && itr_puzzle_slotshape.slots().length + itr_additional_slotshape.slots().length <= MIN_SLOTS_PER_RING) {
 					choices.push(i_puzzle_slotshape)
 				}
 			})
@@ -211,7 +211,7 @@ function start_game(
 			// fill any under max
 			_puzzle_slotshapes.forEach(function(itr_puzzle_slotshape,i_puzzle_slotshape) {
 				var itr_extra_key_count = _i_puzzle_slotshape_to_extra_key_count[i_puzzle_slotshape]
-				if (itr_extra_key_count < MAX_KEYS_PER_RING && itr_puzzle_slotshape.slots().length < MAX_SLOTS_PER_RING) {
+				if (itr_extra_key_count < MAX_KEYS_PER_RING && itr_puzzle_slotshape.slots().length + itr_additional_slotshape.slots().length <= MAX_SLOTS_PER_RING) {
 					choices.push(i_puzzle_slotshape)
 				}
 			})
