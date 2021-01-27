@@ -31,8 +31,8 @@ $(function() {
 		$("#MAX_KEYS").val(6)
 		$("#MIN_KEYS_PER_RING").val(2)
 		$("#MAX_KEYS_PER_RING").val(3)
-		//$("#MIN_SLOTS_PER_RING").val(1)
-		//$("#MAX_SLOTS_PER_RING").val(16)
+		$("#MIN_SLOTS_PER_RING").val(8)
+		$("#MAX_SLOTS_PER_RING").val(8)
 		load_game("Easy")
 	}
 	
@@ -41,13 +41,13 @@ $(function() {
 		
 		$("#SLOTS_IN_RING").val(16)
 		$("#PUZZLE_SHAPE_COUNT").val(3)
-		//$("#KEY_MIN_SIZE").val(2)
-		//$("#KEY_MAX_SIZE").val(4)
+		$("#KEY_MIN_SIZE").val(2)
+		$("#KEY_MAX_SIZE").val(4)
 		$("#MAX_KEYS").val(9)
 		$("#MIN_KEYS_PER_RING").val(2)
 		$("#MAX_KEYS_PER_RING").val(3)
-		//$("#MIN_SLOTS_PER_RING").val(1)
-		//$("#MAX_SLOTS_PER_RING").val(16)
+		$("#MIN_SLOTS_PER_RING").val(8)
+		$("#MAX_SLOTS_PER_RING").val(8)
 		load_game("Medium")
 	}
 	
@@ -56,13 +56,13 @@ $(function() {
 		
 		$("#SLOTS_IN_RING").val(16)
 		$("#PUZZLE_SHAPE_COUNT").val(4)
-		//$("#KEY_MIN_SIZE").val(2)
-		//$("#KEY_MAX_SIZE").val(4)
+		$("#KEY_MIN_SIZE").val(2)
+		$("#KEY_MAX_SIZE").val(4)
 		$("#MAX_KEYS").val(12)
 		$("#MIN_KEYS_PER_RING").val(2)
 		$("#MAX_KEYS_PER_RING").val(3)
-		//$("#MIN_SLOTS_PER_RING").val(1)
-		//$("#MAX_SLOTS_PER_RING").val(16)
+		$("#MIN_SLOTS_PER_RING").val(8)
+		$("#MAX_SLOTS_PER_RING").val(8)
 		load_game("Hard")
 	}
 	
@@ -71,13 +71,13 @@ $(function() {
 		
 		$("#SLOTS_IN_RING").val(16)
 		$("#PUZZLE_SHAPE_COUNT").val(4)
-		//$("#KEY_MIN_SIZE").val(2)
-		//$("#KEY_MAX_SIZE").val(4)
+		$("#KEY_MIN_SIZE").val(2)
+		$("#KEY_MAX_SIZE").val(4)
 		$("#MAX_KEYS").val(16)
 		$("#MIN_KEYS_PER_RING").val(2)
 		$("#MAX_KEYS_PER_RING").val(4)
-		//$("#MIN_SLOTS_PER_RING").val(1)
-		//$("#MAX_SLOTS_PER_RING").val(16)
+		$("#MIN_SLOTS_PER_RING").val(8)
+		$("#MAX_SLOTS_PER_RING").val(8)
 		load_game("Hardest")
 	}
 	
@@ -107,13 +107,13 @@ $(function() {
 		start_game(
 			difficulty_name,
 			puzzle_shape_count,
-			1, //parseInt($("#KEY_MIN_SIZE").val()),
-			4 + 1, //parseInt($("#KEY_MAX_SIZE").val()) + 1,
+			parseInt($("#KEY_MIN_SIZE").val()),
+			parseInt($("#KEY_MAX_SIZE").val()) + 1,
 			extra_choice_count,
 			min_keys_per_ring,
 			max_keys_per_ring,
-			1, //NOT USED //parseInt($("#MIN_SLOTS_PER_RING").val()),
-			8 //parseInt($("#MAX_SLOTS_PER_RING").val())
+			parseInt($("#MIN_SLOTS_PER_RING").val()),
+			parseInt($("#MAX_SLOTS_PER_RING").val())
 		)
 	}
 	
@@ -229,7 +229,7 @@ function start_game(
 			_puzzle_slotshapes.forEach(function(itr_puzzle_slotshape,i_puzzle_slotshape) {
 				var itr_extra_key_count = _i_puzzle_slotshape_to_extra_key_count[i_puzzle_slotshape]
 				//console.log(itr_extra_key_count, MIN_KEYS_PER_RING, itr_puzzle_slotshape.slots().length + itr_additional_slotshape.slots().length, MIN_SLOTS_PER_RING)
-				if (itr_extra_key_count < MIN_KEYS_PER_RING /* && itr_puzzle_slotshape.slots().length + itr_additional_slotshape.slots().length <= MIN_SLOTS_PER_RING*/) {
+				if (itr_extra_key_count < MIN_KEYS_PER_RING && itr_puzzle_slotshape.slots().length + itr_additional_slotshape.slots().length <= MIN_SLOTS_PER_RING) {
 					choices.push(i_puzzle_slotshape)
 				}
 			})
@@ -540,14 +540,10 @@ function start_game(
 	min keys per ring: <input type="number" id="MIN_KEYS_PER_RING" value="1" /> <br/> 
 	max keys per ring: <input type="number" id="MAX_KEYS_PER_RING" value="16" /> <br/>
 	max keys: <input type="number" id="MAX_KEYS" value = "4" /> <br/>
-	<!--
 	min slots per ring: <input type="number" id="MIN_SLOTS_PER_RING" value="1" /> <br/> 
 	max slots per ring: <input type="number" id="MAX_SLOTS_PER_RING" value="16" /> <br/>
--->
-<!--
 	key min size: <input type="number" id="KEY_MIN_SIZE" value="1" /> <br/> 
 	key max size: <input type="number" id="KEY_MAX_SIZE" value="1" /> <br/> 
--->
-	v:1/27/2021_2:28pm
+	v:1/27/2021_2:37pm
 </body>
 </html>
