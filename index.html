@@ -112,8 +112,8 @@ $(function() {
 			extra_choice_count,
 			min_keys_per_ring,
 			max_keys_per_ring,
-			1, //parseInt($("#MIN_SLOTS_PER_RING").val()),
-			MAX_LOCK_SLOT //parseInt($("#MAX_SLOTS_PER_RING").val())
+			1, //NOT USED //parseInt($("#MIN_SLOTS_PER_RING").val()),
+			8 //parseInt($("#MAX_SLOTS_PER_RING").val())
 		)
 	}
 	
@@ -134,13 +134,13 @@ function start_game(
 	EXTRA_CHOICE_COUNT,
 	MIN_KEYS_PER_RING,
 	MAX_KEYS_PER_RING,
-	MIN_SLOTS_PER_RING,
+	MIN_SLOTS_PER_RING, //Not used
 	MAX_SLOTS_PER_RING
 ) {
-	console.log("PUZZLE_SHAPE_COUNT", PUZZLE_SHAPE_COUNT)
-	console.log("EXTRA_CHOICE_COUNT", EXTRA_CHOICE_COUNT)
-	console.log("MIN_KEYS_PER_RING", MIN_KEYS_PER_RING)
-	console.log("MAX_KEYS_PER_RING", MAX_KEYS_PER_RING)
+	//console.log("PUZZLE_SHAPE_COUNT", PUZZLE_SHAPE_COUNT)
+	//console.log("EXTRA_CHOICE_COUNT", EXTRA_CHOICE_COUNT)
+	//console.log("MIN_KEYS_PER_RING", MIN_KEYS_PER_RING)
+	//console.log("MAX_KEYS_PER_RING", MAX_KEYS_PER_RING)
 	
 	_g._canvas = SPCanvas()
 	if (_g._active_timer) {
@@ -242,7 +242,7 @@ function start_game(
 			// fill any under max
 			_puzzle_slotshapes.forEach(function(itr_puzzle_slotshape,i_puzzle_slotshape) {
 				var itr_extra_key_count = _i_puzzle_slotshape_to_extra_key_count[i_puzzle_slotshape]
-				if (itr_extra_key_count < MAX_KEYS_PER_RING /*&& itr_puzzle_slotshape.slots().length + itr_additional_slotshape.slots().length <= MAX_SLOTS_PER_RING*/) {
+				if (itr_extra_key_count < MAX_KEYS_PER_RING && itr_puzzle_slotshape.slots().length + itr_additional_slotshape.slots().length <= MAX_SLOTS_PER_RING) {
 					choices.push(i_puzzle_slotshape)
 				}
 			})
@@ -548,6 +548,6 @@ function start_game(
 	key min size: <input type="number" id="KEY_MIN_SIZE" value="1" /> <br/> 
 	key max size: <input type="number" id="KEY_MAX_SIZE" value="1" /> <br/> 
 -->
-	v:1/27/2021_2:20pm
+	v:1/27/2021_2:28pm
 </body>
 </html>
