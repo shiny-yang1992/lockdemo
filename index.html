@@ -22,54 +22,62 @@ $(function() {
 	};
 	
 	function easy_game() {
+		$("#GAME_WIDTH").val(1000)
+		
 		$("#SLOTS_IN_RING").val(16)
 		$("#PUZZLE_SHAPE_COUNT").val(2)
-		$("#KEY_MIN_SIZE").val(1)
+		$("#KEY_MIN_SIZE").val(2)
 		$("#KEY_MAX_SIZE").val(3)
-		$("#KEY_COUNT").val(4)
-		//$("#MIN_KEYS_PER_RING").val(1)
-		//$("#MAX_KEYS_PER_RING").val(3)
-		$("#MIN_SLOTS_PER_RING").val(1)
-		$("#MAX_SLOTS_PER_RING").val(6)
+		//$("#KEY_COUNT").val(4)
+		$("#MIN_KEYS_PER_RING").val(2)
+		$("#MAX_KEYS_PER_RING").val(3)
+		//$("#MIN_SLOTS_PER_RING").val(1)
+		//$("#MAX_SLOTS_PER_RING").val(16)
 		load_game("Easy")
 	}
 	
 	function medium_game() {
+		$("#GAME_WIDTH").val(1200)
+		
 		$("#SLOTS_IN_RING").val(16)
-		$("#PUZZLE_SHAPE_COUNT").val(2)
+		$("#PUZZLE_SHAPE_COUNT").val(3)
 		$("#KEY_MIN_SIZE").val(2)
-		$("#KEY_MAX_SIZE").val(4)
-		$("#KEY_COUNT").val(5)
-		//$("#MIN_KEYS_PER_RING").val(1)
-		//$("#MAX_KEYS_PER_RING").val(3)
-		$("#MIN_SLOTS_PER_RING").val(4)
-		$("#MAX_SLOTS_PER_RING").val(8)
+		$("#KEY_MAX_SIZE").val(3)
+		//$("#KEY_COUNT").val(5)
+		$("#MIN_KEYS_PER_RING").val(2)
+		$("#MAX_KEYS_PER_RING").val(3)
+		//$("#MIN_SLOTS_PER_RING").val(1)
+		//$("#MAX_SLOTS_PER_RING").val(16)
 		load_game("Medium")
 	}
 	
 	function hard_game() {
+		$("#GAME_WIDTH").val(1400)
+		
 		$("#SLOTS_IN_RING").val(16)
 		$("#PUZZLE_SHAPE_COUNT").val(4)
 		$("#KEY_MIN_SIZE").val(2)
-		$("#KEY_MAX_SIZE").val(4)
-		$("#KEY_COUNT").val(8)
-		//$("#MIN_KEYS_PER_RING").val(2)
-		//$("#MAX_KEYS_PER_RING").val(4)
-		$("#MIN_SLOTS_PER_RING").val(4)
-		$("#MAX_SLOTS_PER_RING").val(10)
+		$("#KEY_MAX_SIZE").val(3)
+		//$("#KEY_COUNT").val(8)
+		$("#MIN_KEYS_PER_RING").val(2)
+		$("#MAX_KEYS_PER_RING").val(3)
+		//$("#MIN_SLOTS_PER_RING").val(1)
+		//$("#MAX_SLOTS_PER_RING").val(16)
 		load_game("Hard")
 	}
 	
 	function hardest_game() {
+		$("#GAME_WIDTH").val(2000)
+		
 		$("#SLOTS_IN_RING").val(16)
-		$("#PUZZLE_SHAPE_COUNT").val(3)
+		$("#PUZZLE_SHAPE_COUNT").val(4)
 		$("#KEY_MIN_SIZE").val(2)
 		$("#KEY_MAX_SIZE").val(4)
-		$("#KEY_COUNT").val(8)
-		//$("#MIN_KEYS_PER_RING").val(3)
-		//$("#MAX_KEYS_PER_RING").val(5)
-		$("#MIN_SLOTS_PER_RING").val(4)
-		$("#MAX_SLOTS_PER_RING").val(10)
+		//$("#KEY_COUNT").val(8)
+		$("#MIN_KEYS_PER_RING").val(2)
+		$("#MAX_KEYS_PER_RING").val(4)
+		//$("#MIN_SLOTS_PER_RING").val(1)
+		//$("#MAX_SLOTS_PER_RING").val(16)
 		load_game("Hardest")
 	}
 	
@@ -77,11 +85,19 @@ $(function() {
 		$("#game").prop("width", parseInt($("#GAME_WIDTH").val()))
 		MAX_LOCK_SLOT = parseInt($("#SLOTS_IN_RING").val())
 		var puzzle_shape_count = parseInt($("#PUZZLE_SHAPE_COUNT").val())
-		var key_count = parseInt($("#KEY_COUNT").val()) 
+		//var key_count = parseInt($("#KEY_COUNT").val())
+		
+		var min_keys_per_ring = parseInt($("#MIN_KEYS_PER_RING").val())
+		var max_keys_per_ring = parseInt($("#MAX_KEYS_PER_RING").val())
+		var key_count = 0
+		for (var i = 0; i < puzzle_shape_count; i++) {
+			key_count += SPUtil.rand_rangei(min_keys_per_ring, max_keys_per_ring + 1)
+		}
+		
 		var extra_choice_count = key_count - puzzle_shape_count
 		if (extra_choice_count < 0) {
 			extra_choice_count = 0
-			$("#KEY_COUNT").val(puzzle_shape_count)
+			//$("#KEY_COUNT").val(puzzle_shape_count)
 		}
 		start_game(
 			difficulty_name,
@@ -89,10 +105,10 @@ $(function() {
 			parseInt($("#KEY_MIN_SIZE").val()),
 			parseInt($("#KEY_MAX_SIZE").val()),
 			extra_choice_count,
-			parseInt($("#MIN_KEYS_PER_RING").val()),
-			parseInt($("#MAX_KEYS_PER_RING").val()),
-			parseInt($("#MIN_SLOTS_PER_RING").val()),
-			parseInt($("#MAX_SLOTS_PER_RING").val())
+			min_keys_per_ring,
+			max_keys_per_ring,
+			1, //parseInt($("#MIN_SLOTS_PER_RING").val()),
+			MAX_LOCK_SLOT //parseInt($("#MAX_SLOTS_PER_RING").val())
 		)
 	}
 	
@@ -492,10 +508,10 @@ function start_game(
 
 <body>
 	Presets:
-	<button id="easy">easy</button>
-	<button id="medium">medium</button>
-	<button id="hard">hard</button>
-	<button id="hardest">hardest</button>
+	<button id="easy">novice</button>
+	<button id="medium">advanced</button>
+	<button id="hard">expert</button>
+	<button id="hardest">master</button>
 	<br/>
 	<canvas id="game" width="1000px" height="600px" style="background-color:rgb(245,245,245)" oncontextmenu="return false;">
 	</canvas>
@@ -506,13 +522,15 @@ function start_game(
 	game width: <input type="number" id="GAME_WIDTH" value="1000" /> (default 1000) <br/>
 	slots in ring: <input type="number" id="SLOTS_IN_RING" value="16" /> (default 16) <br/>
 	puzzle ring count: <input type="number" id="PUZZLE_SHAPE_COUNT" value="4" /> <br/>
-	key count: <input type="number" id="KEY_COUNT" value = "4" /> <br/>
-	min slots per ring: <input type="number" id="MIN_SLOTS_PER_RING" value="1" /> <br/> 
-	max slots per ring: <input type="number" id="MAX_SLOTS_PER_RING" value="16" /> <br/>
 	min keys per ring: <input type="number" id="MIN_KEYS_PER_RING" value="1" /> <br/> 
 	max keys per ring: <input type="number" id="MAX_KEYS_PER_RING" value="16" /> <br/>
+	<!--key count: <input type="number" id="KEY_COUNT" value = "4" /> <br/>-->
+	<!--
+	min slots per ring: <input type="number" id="MIN_SLOTS_PER_RING" value="1" /> <br/> 
+	max slots per ring: <input type="number" id="MAX_SLOTS_PER_RING" value="16" /> <br/>
+-->
 	key min size: <input type="number" id="KEY_MIN_SIZE" value="1" /> <br/> 
 	key max size: <input type="number" id="KEY_MAX_SIZE" value="1" /> <br/> 
-	v:1/8/2021_5:37pm
+	v:1/27/2021_1:34pm
 </body>
 </html>
