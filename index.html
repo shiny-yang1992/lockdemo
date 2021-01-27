@@ -52,7 +52,7 @@ $(function() {
 	}
 	
 	function hard_game() {
-		$("#GAME_WIDTH").val(1400)
+		$("#GAME_WIDTH").val(1500)
 		
 		$("#SLOTS_IN_RING").val(16)
 		$("#PUZZLE_SHAPE_COUNT").val(4)
@@ -104,12 +104,19 @@ $(function() {
 			extra_choice_count = 0
 			//$("#KEY_COUNT").val(puzzle_shape_count)
 		}
+		
+		var unused_choice_count = 0
+		if (max_keys > key_count) {
+			unused_choice_count = max_keys - key_count
+		}
+		
 		start_game(
 			difficulty_name,
 			puzzle_shape_count,
 			parseInt($("#KEY_MIN_SIZE").val()),
 			parseInt($("#KEY_MAX_SIZE").val()) + 1,
 			extra_choice_count,
+			unused_choice_count,
 			min_keys_per_ring,
 			max_keys_per_ring,
 			parseInt($("#MIN_SLOTS_PER_RING").val()),
@@ -132,6 +139,7 @@ function start_game(
 	KEY_MIN_SIZE, 
 	KEY_MAX_SIZE, 
 	EXTRA_CHOICE_COUNT,
+	UNUSED_CHOICE_COUNT,
 	MIN_KEYS_PER_RING,
 	MAX_KEYS_PER_RING,
 	MIN_SLOTS_PER_RING, //Not used
@@ -192,24 +200,32 @@ function start_game(
 	})
 	
 	// create extra keys
-	var _choice_additional_slotshapes = []
-	for (var i = 0; i < EXTRA_CHOICE_COUNT; i++) {
-		var itr_slotshape = SlotShape(_g)
-		var available_slots = []
-		for (var j = 0; j < MAX_LOCK_SLOT; j++) {
-			available_slots.push(j)
-		}
-		for (var j = 0; j < SPUtil.rand_rangei(KEY_MIN_SIZE, KEY_MAX_SIZE); j++) {
-			var tar_i = SPUtil.rand_rangei(0,slots.length)
-			var tar_val = slots[tar_i]
-			available_slots.splice(tar_i,1)
-			if (itr_slotshape.slots().indexOf(tar_val) == -1) {
-				itr_slotshape.slots().push(tar_val)
+	function generate_choice_slotshapes(count, callbackfn) {
+		for (var i = 0; i < count; i++) {
+			var itr_slotshape = SlotShape(_g)
+			var available_slots = []
+			for (var j = 0; j < MAX_LOCK_SLOT; j++) {
+				available_slots.push(j)
 			}
-		}
-		_choice_additional_slotshapes.push(itr_slotshape)
-		_choice_slotshapes.push(itr_slotshape)
+			for (var j = 0; j < SPUtil.rand_rangei(KEY_MIN_SIZE, KEY_MAX_SIZE); j++) {
+				var tar_i = SPUtil.rand_rangei(0,slots.length)
+				var tar_val = slots[tar_i]
+				available_slots.splice(tar_i,1)
+				if (itr_slotshape.slots().indexOf(tar_val) == -1) {
+					itr_slotshape.slots().push(tar_val)
+				}
+			}
+			_choice_slotshapes.push(itr_slotshape)
+			if (callbackfn) {
+				callbackfn(itr_slotshape)
+			}
+		}	
 	}
+	
+	var _choice_additional_slotshapes = []
+	generate_choice_slotshapes(EXTRA_CHOICE_COUNT, function(itr_slotshape) {
+		_choice_additional_slotshapes.push(itr_slotshape)
+	})
 	
 	var _i_puzzle_slotshape_to_extra_key_count = {}
 	_puzzle_slotshapes.forEach(function(itr_puzzle_slotshape,i_puzzle_slotshape) {
@@ -288,6 +304,8 @@ function start_game(
 			j = j + 1
 		}
 	})
+	
+	generate_choice_slotshapes(UNUSED_CHOICE_COUNT)
 	
 	SPUtil.array_shuffle(_choice_slotshapes)
 	_choice_slotshapes.forEach(function(itr,i) {
@@ -544,6 +562,6 @@ function start_game(
 	max slots per ring: <input type="number" id="MAX_SLOTS_PER_RING" value="16" /> <br/>
 	key min size: <input type="number" id="KEY_MIN_SIZE" value="1" /> <br/> 
 	key max size: <input type="number" id="KEY_MAX_SIZE" value="1" /> <br/> 
-	v:1/27/2021_2:37pm
+	v:1/27/2021_3:14pm
 </body>
 </html>
