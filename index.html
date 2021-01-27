@@ -137,6 +137,11 @@ function start_game(
 	MIN_SLOTS_PER_RING,
 	MAX_SLOTS_PER_RING
 ) {
+	console.log("PUZZLE_SHAPE_COUNT", PUZZLE_SHAPE_COUNT)
+	console.log("EXTRA_CHOICE_COUNT", EXTRA_CHOICE_COUNT)
+	console.log("MIN_KEYS_PER_RING", MIN_KEYS_PER_RING)
+	console.log("MAX_KEYS_PER_RING", MAX_KEYS_PER_RING)
+	
 	_g._canvas = SPCanvas()
 	if (_g._active_timer) {
 		window.clearInterval(_g._active_timer)
@@ -223,16 +228,21 @@ function start_game(
 			// fill any under min
 			_puzzle_slotshapes.forEach(function(itr_puzzle_slotshape,i_puzzle_slotshape) {
 				var itr_extra_key_count = _i_puzzle_slotshape_to_extra_key_count[i_puzzle_slotshape]
-				if (itr_extra_key_count < MIN_KEYS_PER_RING && itr_puzzle_slotshape.slots().length + itr_additional_slotshape.slots().length <= MIN_SLOTS_PER_RING) {
+				//console.log(itr_extra_key_count, MIN_KEYS_PER_RING, itr_puzzle_slotshape.slots().length + itr_additional_slotshape.slots().length, MIN_SLOTS_PER_RING)
+				if (itr_extra_key_count < MIN_KEYS_PER_RING /* && itr_puzzle_slotshape.slots().length + itr_additional_slotshape.slots().length <= MIN_SLOTS_PER_RING*/) {
 					choices.push(i_puzzle_slotshape)
 				}
 			})
-			if (choices.length > 0) { return choices[SPUtil.rand_rangei(0,choices.length)] }
+			if (choices.length > 0) {
+				var choice = choices[SPUtil.rand_rangei(0,choices.length)]
+				//console.log(choice, choices)
+				return choice
+			}
 			
 			// fill any under max
 			_puzzle_slotshapes.forEach(function(itr_puzzle_slotshape,i_puzzle_slotshape) {
 				var itr_extra_key_count = _i_puzzle_slotshape_to_extra_key_count[i_puzzle_slotshape]
-				if (itr_extra_key_count < MAX_KEYS_PER_RING && itr_puzzle_slotshape.slots().length + itr_additional_slotshape.slots().length <= MAX_SLOTS_PER_RING) {
+				if (itr_extra_key_count < MAX_KEYS_PER_RING /*&& itr_puzzle_slotshape.slots().length + itr_additional_slotshape.slots().length <= MAX_SLOTS_PER_RING*/) {
 					choices.push(i_puzzle_slotshape)
 				}
 			})
@@ -538,6 +548,6 @@ function start_game(
 	key min size: <input type="number" id="KEY_MIN_SIZE" value="1" /> <br/> 
 	key max size: <input type="number" id="KEY_MAX_SIZE" value="1" /> <br/> 
 -->
-	v:1/27/2021_2:03pm
+	v:1/27/2021_2:20pm
 </body>
 </html>
